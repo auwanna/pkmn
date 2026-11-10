@@ -1,0 +1,17 @@
+@custom-variant au-light {
+  &:where([data-theme="light"] *) {
+    @slot;
+  }
+}
+
+@custom-variant au-dark {
+  &:where([data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+@custom-variant au-system {
+  &:where([data-theme="system"] *) {
+    @slot;
+  }
+}

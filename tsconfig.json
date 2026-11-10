@@ -1,0 +1,21 @@
+{
+  "include": ["src"],
+  "compilerOptions": {
+    "target": "ES2020",
+    "types": ["@rsbuild/core/types", "@types/node"],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/cva": ["./cva.config.ts"]
+    }
+  }
+}

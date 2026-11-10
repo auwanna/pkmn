@@ -1,0 +1,117 @@
+/* Pokemon Types */
+[data-poketype="normal"] {
+  --poketype: #a8a77a;
+}
+
+[data-poketype="fire"] {
+  --poketype: #ee8130;
+}
+
+[data-poketype="water"] {
+  --poketype: #6390f0;
+}
+
+[data-poketype="electric"] {
+  --poketype: #f7d02c;
+}
+
+[data-poketype="grass"] {
+  --poketype: #7ac74c;
+}
+
+[data-poketype="ice"] {
+  --poketype: #96d9d6;
+}
+
+[data-poketype="fighting"] {
+  --poketype: #c22e28;
+}
+
+[data-poketype="poison"] {
+  --poketype: #a33ea1;
+}
+
+[data-poketype="ground"] {
+  --poketype: #e2bf65;
+}
+
+[data-poketype="flying"] {
+  --poketype: #a98ff3;
+}
+
+[data-poketype="psychic"] {
+  --poketype: #f95587;
+}
+
+[data-poketype="bug"] {
+  --poketype: #a6b91a;
+}
+
+[data-poketype="rock"] {
+  --poketype: #b6a136;
+}
+
+[data-poketype="ghost"] {
+  --poketype: #735797;
+}
+
+[data-poketype="dragon"] {
+  --poketype: #6f35fc;
+}
+
+[data-poketype="dark"] {
+  --poketype: #705746;
+}
+
+[data-poketype="steel"] {
+  --poketype: #b7b7ce;
+}
+
+[data-poketype="fairy"] {
+  --poketype: #d685ad;
+}
+
+/* Card Energies */
+[data-energy="colorless"] {
+  --energy: #dad5d1;
+}
+
+[data-energy="darkness"] {
+  --energy: #375968;
+}
+
+[data-energy="dragon"] {
+  --energy: #b7802b;
+}
+
+[data-energy="fairy"] {
+  --energy: #ee93b6;
+}
+
+[data-energy="fighting"] {
+  --energy: #b14407;
+}
+
+[data-energy="fire"] {
+  --energy: #df2b29;
+}
+
+[data-energy="grass"] {
+  --energy: #009735;
+}
+
+[data-energy="lightning"] {
+  --energy: #f9cb00;
+}
+
+[data-energy="metal"] {
+  --energy: #928a7c;
+}
+
+[data-energy="psychic"] {
+  --energy: #894c94;
+}
+
+[data-energy="water"] {
+  --energy: #0097da;
+}
