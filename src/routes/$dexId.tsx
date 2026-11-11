@@ -9,7 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/breadcrumb";
-import { Grid, GridList } from "@/components/grid";
+
 import { Link } from "@/components/link";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/pagination";
 import { pokedex } from "@/features/pokeapi/data/pokedex";
@@ -140,10 +140,10 @@ function RouteComponent() {
         <SelectSort />
       </div>
 
-      <Grid className="flex grow flex-col">
-        <GridList>
+      <div className="flex grow flex-col">
+        <ul className="grid grid-cols-fill gap-2 px-3">
           <GridItems initialParams={initialParams} />
-        </GridList>
+        </ul>
         <div className="mt-4 mb-4">
           <Pagination>
             <PaginationContent className="gap-0 rounded-xs border p-1">
@@ -165,7 +165,7 @@ function RouteComponent() {
             </PaginationContent>
           </Pagination>
         </div>
-      </Grid>
+      </div>
     </main>
   );
 }

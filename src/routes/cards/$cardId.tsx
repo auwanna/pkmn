@@ -16,12 +16,9 @@ import { Link } from "@/components/link";
 import { ImageCard } from "@/features/tcgdex/components/card-image";
 import { tcgDexQueryKeys } from "@/features/tcgdex/lib/react-query-keys";
 import { getCard } from "@/features/tcgdex/lib/requests";
-import type {
-  APITCGdexCardmarketPricing,
-  APITCGdexTCGPlayerPricing,
-} from "@/features/tcgdex/types";
 import { DEFAULT_SEARCH_PARAMS } from "@/lib/requests";
 import { seo } from "@/lib/seo";
+import { energyIcons } from "@/assets/images/energies";
 
 const cardQueryOptions = (id: string) =>
   queryOptions({
@@ -88,6 +85,8 @@ export const Route = createFileRoute("/cards/$cardId")({
 function RouteComponent() {
   const params = useParams({ from: "/cards/$cardId" });
   const { data } = useSuspenseQuery(cardQueryOptions(params.cardId));
+
+  console.log(data.pricing);
 
   return (
     <main className="flex grow flex-col">
@@ -233,7 +232,7 @@ function RouteComponent() {
                             <img
                               alt={`card type ${item}`}
                               height={20}
-                              src={`/energies/${item.toLowerCase()}.png`}
+                              src={energyIcons[item.toLowerCase()]}
                               width={20}
                             />
                           </span>
@@ -428,7 +427,7 @@ function RouteComponent() {
                               <img
                                 alt={`${item} energy`}
                                 height={20}
-                                src={`/energies/colorless.png`}
+                                src={energyIcons.colorless}
                                 width={20}
                               />
                             </span>
@@ -453,7 +452,7 @@ function RouteComponent() {
                             <img
                               alt={`${item.type} energy`}
                               height={20}
-                              src={`/energies/${item.type.toLowerCase()}.png`}
+                              src={energyIcons[item.type.toLowerCase()]}
                               width={20}
                             />
                             <span className="font-mono">{item.value}</span>
@@ -481,7 +480,7 @@ function RouteComponent() {
                             <img
                               alt={`${item.type} energy`}
                               height={20}
-                              src={`/energies/${item.type.toLowerCase()}.png`}
+                              src={energyIcons[item.type.toLowerCase()]}
                               width={20}
                             />
                             <span className="font-mono">{item.value}</span>
@@ -541,7 +540,8 @@ function RouteComponent() {
                                     <img
                                       alt={`energy ${energy}`}
                                       height={20}
-                                      src={`/energies/${energy.toLowerCase()}.png`}
+                                      src={energyIcons[energy.toLowerCase()]}
+
                                       width={20}
                                     />
                                   </span>
@@ -597,40 +597,43 @@ function RouteComponent() {
                     <div className="@container/market flex-1 p-4">
                       <Optional
                         data={data.pricing}
-                        fallback={EmptyPrice}
                         name="tcgplayer"
-                        render={(_, { unit, updated, ...variants }) => {
+                        render={(_, data) => {
+                          if (!data.prices[0]) return <EmptyPrice />;
+
                           return (
                             <div className="flex flex-col gap-4">
-                              {Object.entries(variants).map(([variant, prices]) => (
-                                <div key={`tcg-${variant}`}>
-                                  <Label
-                                    render={<h4 />}
-                                    className="border-b-4 font-bold font-display text-sm uppercase"
-                                  >
-                                    {getPriceLabel(variant as PriceKey)} Variant
-                                  </Label>
+                              {data.prices.map((variant) => {
+                                return (
+                                  <div key={`tcg-${variant.label}`}>
+                                    <Label
+                                      render={<h4 />}
+                                      className="border-b-4 font-bold font-display text-sm uppercase"
+                                    >
+                                      {variant.label} Variant
+                                    </Label>
 
-                                  <dl className="ml-2 grid @sm/market:grid-cols-3 @xl/market:grid-cols-5 grid-cols-2 gap-x-4 gap-y-2 border-l pt-2 pl-2">
-                                    {Object.entries(prices).map(([key, value]) => (
-                                      <div
-                                        className="flex flex-col justify-between"
-                                        key={`tcg-${key}`}
-                                      >
-                                        <Label
-                                          render={<dt />}
-                                          className="border-b-0 font-bold font-display text-muted-foreground text-sm uppercase"
-                                        >
-                                          {getPriceLabel(key as PriceKey)}
-                                        </Label>
-                                        <dd className="font-mono text-lg">
-                                          {value ? `$${value.toFixed(2) || "N/A"}` : "--"}
-                                        </dd>
-                                      </div>
-                                    ))}
-                                  </dl>
-                                </div>
-                              ))}
+                                    <dl className="ml-2 grid @sm/market:grid-cols-3 @xl/market:grid-cols-5 grid-cols-2 gap-x-4 gap-y-2 border-l pt-2 pl-2">
+                                      {variant.prices.map((price) => {
+                                        return (
+                                          <div
+                                            className="flex flex-col justify-between"
+                                            key={`tcg-${variant.label}-${price.label}`}
+                                          >
+                                            <Label
+                                              render={<dt />}
+                                              className="border-b-0 font-bold font-display text-muted-foreground text-sm uppercase"
+                                            >
+                                              {price.label}
+                                            </Label>
+                                            <dd className="font-mono text-lg">{price.value}</dd>
+                                          </div>
+                                        );
+                                      })}
+                                    </dl>
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
                         }}
@@ -658,44 +661,45 @@ function RouteComponent() {
                     <div className="@container/market flex-1 p-4">
                       <Optional
                         data={data.pricing}
-                        fallback={EmptyPrice}
                         name="cardmarket"
-                        render={(_, { unit, updated, ...prices }) => (
-                          <div className="flex flex-col gap-4">
-                            {Object.entries(groupCardmarketPrices(prices)).map(
-                              ([category, prices]) => (
-                                <div key={`cm-${category}`}>
-                                  <Label
-                                    render={<h4 />}
-                                    className="border-b-4 font-bold font-display text-sm uppercase"
-                                  >
-                                    {category}
-                                  </Label>
-                                  <dl className="ml-2 grid @sm/market:grid-cols-3 @xl/market:grid-cols-5 grid-cols-2 gap-x-4 gap-y-2 border-l pt-2 pl-2">
-                                    {prices.map(({ key, value }) => {
-                                      return (
-                                        <div
-                                          className="flex flex-col justify-between"
-                                          key={`cm-${key}`}
-                                        >
-                                          <Label
-                                            render={<dt />}
-                                            className="border-b-0 font-bold font-display text-muted-foreground text-sm uppercase"
+                        render={(_, data) => {
+                          if (!data.prices[0]) return <EmptyPrice />;
+
+                          return (
+                            <div className="flex flex-col gap-4">
+                              {data.prices.map((category) => {
+                                return (
+                                  <div key={`cm-${category.label}`}>
+                                    <Label
+                                      render={<h4 />}
+                                      className="border-b-4 font-bold font-display text-sm uppercase"
+                                    >
+                                      {category.label}
+                                    </Label>
+                                    <dl className="ml-2 grid @sm/market:grid-cols-3 @xl/market:grid-cols-5 grid-cols-2 gap-x-4 gap-y-2 border-l pt-2 pl-2">
+                                      {category.prices.map((price) => {
+                                        return (
+                                          <div
+                                            className="flex flex-col justify-between"
+                                            key={`cm-${price.label}`}
                                           >
-                                            {getPriceLabel(key as PriceKey)}
-                                          </Label>
-                                          <dd className="font-mono text-lg">
-                                            {value ? `€${value.toFixed(2) || "N/A"}` : "--"}
-                                          </dd>
-                                        </div>
-                                      );
-                                    })}
-                                  </dl>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        )}
+                                            <Label
+                                              render={<dt />}
+                                              className="border-b-0 font-bold font-display text-muted-foreground text-sm uppercase"
+                                            >
+                                              {price.label}
+                                            </Label>
+                                            <dd className="font-mono text-lg">{price.value}</dd>
+                                          </div>
+                                        );
+                                      })}
+                                    </dl>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        }}
                       />
                     </div>
                   </div>
@@ -707,80 +711,6 @@ function RouteComponent() {
       </article>
     </main>
   );
-}
-
-type PriceKey = Exclude<
-  keyof APITCGdexTCGPlayerPricing | keyof APITCGdexCardmarketPricing,
-  "unit" | "updated"
->;
-
-function getPriceLabel(key: PriceKey): string {
-  const labelMap: Record<PriceKey, string> = {
-    normal: "Normal",
-    holofoil: "Holofoil",
-    "reverse-holofoil": "Reverse Holofoil",
-    "1st-edition": "1st Edition",
-    "1st-edition-holofoil": "1st Edition Holofoil",
-    unlimited: "Unlimited",
-    "unlimited-holofoil": "Unlimited Holofoil",
-
-    avg: "Average",
-    low: "Lowest",
-    trend: "Trend",
-    avg1: "1-Day",
-    avg7: "7-Day",
-    avg30: "30-Day",
-    "avg-holo": "Average Holofoil",
-    "low-holo": "Lowest Holofoil",
-    "trend-holo": "Trend Holofoil",
-    "avg1-holo": "1-Day Holofoil",
-    "avg7-holo": "7-Day Holofoil",
-    "avg30-holo": "30-Day Holofoil",
-  };
-
-  if (labelMap[key]) {
-    return labelMap[key];
-  }
-
-  return key
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim();
-}
-
-function groupCardmarketPrices(prices: Partial<Record<PriceKey, number>>) {
-  type GroupLabel =
-    | "Average Prices"
-    | "Other Variant Prices"
-    | "Holofoil Prices"
-    | "Standard Prices";
-
-  type Group = Record<GroupLabel, GroupItem[]>;
-
-  type GroupItem = {
-    key: string;
-    value: number;
-  };
-
-  const groups: Group = {
-    "Average Prices": [],
-    "Other Variant Prices": [],
-    "Holofoil Prices": [],
-    "Standard Prices": [],
-  };
-
-  for (const [key, value] of Object.entries(prices)) {
-    if (!value || typeof value !== "number") continue;
-
-    if (key.endsWith("holo")) {
-      groups["Holofoil Prices"].push({ key, value });
-      continue;
-    }
-
-    groups["Standard Prices"].push({ key, value });
-  }
-
-  return Object.fromEntries(Object.entries(groups).filter(([, items]) => items.length > 0));
 }
 
 function EmptyPrice() {

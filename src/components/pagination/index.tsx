@@ -3,6 +3,7 @@ import type * as React from "react";
 import { cn } from "@/cva";
 import { type Button, buttonVariants } from "@/components/button";
 import { Link } from "@/components/link";
+import type { LinkComponent } from "@tanstack/react-router";
 
 const icons = {
   Right: IconChevronRight,

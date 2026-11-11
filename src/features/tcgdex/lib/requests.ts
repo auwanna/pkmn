@@ -1,18 +1,19 @@
 import type { SearchRouteSchemaOutput } from "@/features/tcgdex/schemas/search";
 import type {
   APITCGdexCardBrief,
+  APITCGdexCardmarketPricing,
   APITCGdexPokemonCard,
   APITCGdexSerie,
   APITCGdexSerieBrief,
   APITCGdexSet,
+  APITCGdexTCGPlayerPricing,
   GraphlqlSets,
-} from "@/features/tcgdex/types";
+} from "@/features/tcgdex/types/api";
+import type { PokemonCard, TCGPrice } from "../types";
 
 export const TCGDEX_API = "https://api.tcgdex.net/v2/";
 
-export async function request<T>(
-  ...[input, init]: Parameters<typeof fetch>
-): Promise<T> {
+export async function request<T>(...[input, init]: Parameters<typeof fetch>): Promise<T> {
   console.time(input.toString());
   const response = await fetch(input, {
     ...init,
@@ -32,7 +33,109 @@ export function getEndpoint(endpoint: string) {
 
 export async function getCard(cardId: string) {
   const url = new URL(`https://api.tcgdex.net/v2/en/cards/${cardId}`);
-  return await request<APITCGdexPokemonCard>(url.href);
+  const { pricing, ...res } = await request<APITCGdexPokemonCard>(url.href);
+
+  const data: PokemonCard = {
+    ...res,
+    pricing: {
+      tcgplayer: fmtTCGPlayerPrices(pricing.tcgplayer),
+      cardmarket: fmtCardmarketPrice(pricing.cardmarket),
+    },
+  };
+
+  return data;
+}
+
+type PriceGroup = {
+  label: string;
+  prices: { label: string; value: string }[];
+};
+
+function fmtCardmarketPrice(
+  vendor?: APITCGdexCardmarketPricing | null,
+): PokemonCard["pricing"]["cardmarket"] {
+  if (!vendor) return null;
+  const { updated, idProduct, unit, ...rest } = vendor;
+
+  const groups = new Map<string, PriceGroup["prices"]>();
+
+  for (const [key, value] of Object.entries(rest)) {
+    if (typeof value !== "number") continue;
+
+    const isHolo = key.endsWith("-holo");
+    const group = isHolo ? "Holofoil Prices" : "Standard Prices";
+    const label = isHolo ? key.slice(0, -"-holo".length) : key;
+
+    const prices = groups.get(group) ?? [];
+    prices.push({ label: getPriceLabel(label), value: `€${value.toFixed(2)}` });
+    groups.set(group, prices);
+  }
+
+  return {
+    updated,
+    unit,
+    productId: idProduct,
+    prices: Array.from(groups, ([label, prices]) => ({ label, prices })),
+  };
+}
+
+function fmtTCGPlayerPrices(
+  vendor?: APITCGdexTCGPlayerPricing | null,
+): PokemonCard["pricing"]["tcgplayer"] {
+  if (!vendor) return null;
+  const { updated, unit, ...rest } = vendor;
+
+  const prices: TCGPrice[] = [];
+  for (const [variant, price] of Object.entries(rest)) {
+    const data: TCGPrice = { label: getPriceLabel(variant), prices: [] };
+
+    for (const [label, value] of Object.entries(price)) {
+      data.prices.push({
+        label: getPriceLabel(label),
+        value: value ? `€${value.toFixed(2) || "N/A"}` : "--",
+      });
+    }
+  }
+
+  return {
+    updated,
+    unit,
+    prices,
+  };
+}
+
+function getPriceLabel(key: string): string {
+  const labelMap: Record<string, string> = {
+    normal: "Normal",
+    holofoil: "Holofoil",
+    "reverse-holofoil": "Reverse Holofoil",
+    "1st-edition": "1st Edition",
+    "1st-edition-holofoil": "1st Edition Holofoil",
+    unlimited: "Unlimited",
+    "unlimited-holofoil": "Unlimited Holofoil",
+
+    avg: "Average",
+    low: "Lowest",
+    trend: "Trend",
+    avg1: "1-Day",
+    avg7: "7-Day",
+    avg30: "30-Day",
+    "avg-holo": "Average Holofoil",
+    "low-holo": "Lowest Holofoil",
+    "trend-holo": "Trend Holofoil",
+    "avg1-holo": "1-Day Holofoil",
+    "avg7-holo": "7-Day Holofoil",
+    "avg30-holo": "30-Day Holofoil",
+  };
+
+  if (labelMap[key]) {
+    return labelMap[key];
+  }
+
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase())
+    .trim();
 }
 
 const tcgDexKeyTable: Record<keyof SearchRouteSchemaOutput, string> = {

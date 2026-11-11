@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Badge } from "@/components/badge";
 import { Link } from "@/components/link";
 import { LogoImage } from "@/features/tcgdex/components/logo-image";
-import type { GraphlqlSets } from "@/features/tcgdex/types";
+import type { GraphlqlSets } from "@/features/tcgdex/types/api";
 import { DEFAULT_SEARCH_PARAMS } from "@/lib/requests";
 import { useAppStore } from "@/stores/use-app-store";
 

@@ -6,7 +6,6 @@ import {
   IconMoodLookDown,
   IconPokeballOff,
 } from "@tabler/icons-react";
-import { GridItem } from "@/components/grid";
 import { Link } from "@/components/link";
 import { PaginationLink, PaginationNext, PaginationPrevious } from "@/components/pagination";
 import { Skeleton } from "@/components/skeleton";
@@ -22,9 +21,9 @@ export function GridItems({ initialParams }: { initialParams?: UseCardsParams })
         {Array.from({ length: 20 }).map((_, i) => {
           const key = `cards-list-skeleton-${i}`;
           return (
-            <GridItem className="flex flex-col gap-2 rounded-xs border bg-card p-2" key={key}>
+            <li className="flex flex-col gap-2 rounded-xs border bg-card p-2" key={key}>
               <Skeleton className="aspect-2.5/3.5 w-full bg-foreground/5" />
-            </GridItem>
+            </li>
           );
         })}
       </>
@@ -33,30 +32,30 @@ export function GridItems({ initialParams }: { initialParams?: UseCardsParams })
 
   if (status === "error") {
     return (
-      <GridItem className="col-span-full flex flex-col items-center justify-center gap-4 place-self-center font-display text-xl">
+      <li className="col-span-full flex flex-col items-center justify-center gap-4 place-self-center font-display text-xl">
         <IconMoodLookDown className="size-40 text-muted-foreground" />
         <p className="max-w-xs text-center font-bold text-5xl">There was an error fetching cards</p>
-      </GridItem>
+      </li>
     );
   }
 
   if (!data?.data || data.data.length === 0) {
     return (
-      <GridItem className="col-span-full flex flex-col items-center justify-center gap-4 place-self-center font-display text-xl">
+      <li className="col-span-full flex flex-col items-center justify-center gap-4 place-self-center font-display text-xl">
         <IconPokeballOff className="size-40 text-muted-foreground" />
         <p className="max-w-xs text-center font-bold text-5xl">No cards were found.</p>
-      </GridItem>
+      </li>
     );
   }
 
   return (
     <>
       {data.data.map((data) => (
-        <GridItem className="group relative" key={data.id}>
+        <li className="group relative" key={data.id}>
           <Link className="focus-visible:ring-0" params={{ cardId: data.id }} to="/cards/$cardId">
             <ImageCard alt={data.name} src={data.image} loading="lazy" />
           </Link>
-        </GridItem>
+        </li>
       ))}
     </>
   );
